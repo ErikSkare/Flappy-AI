@@ -5,7 +5,7 @@ from app.actor import Actor
 pipe_width = 30
 pipe_gap = 50
 pipe_color = (255, 255, 255)
-pipe_velocity_x = 200
+pipe_velocity_x = -200
 
 
 class Pipe(Actor):
@@ -14,7 +14,7 @@ class Pipe(Actor):
         self.gap_y_start = gap_y_start
 
     def update_state(self, events, dt):
-        self.x_pos -= pipe_velocity_x * dt
+        self.x_pos += pipe_velocity_x * dt
 
     def draw(self, screen):
         width, height = screen.get_size()
