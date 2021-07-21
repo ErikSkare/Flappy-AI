@@ -6,7 +6,7 @@ bird_radius = 10
 bird_x_pos = 50
 bird_color = (255, 255, 255)
 bird_down_acceleration = 1500
-jump_velocity = -25000
+jump_velocity = -300
 
 
 class Bird(Actor):
@@ -23,7 +23,7 @@ class Bird(Actor):
         if self.keyboard_input_enabled: self.process_keyboard_input(events)
 
         if self.should_jump: 
-            self.y_velocity = jump_velocity * dt
+            self.y_velocity = jump_velocity
             self.should_jump = False
 
         self.y_pos += self.y_velocity * dt
