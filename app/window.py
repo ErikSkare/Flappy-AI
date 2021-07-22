@@ -1,18 +1,15 @@
 import sys, random, pygame
-from app.bird import Bird, bird_x_pos, bird_radius
-from app.pipe import Pipe, pipe_width, pipe_gap, pipe_velocity_x
-
-
-window_bg_color = (0, 0, 0)
-pipes_distance_between = 200
-pipes_range_margin = 20
+from app.bird import Bird
+from app.pipe import Pipe
+from app.constants import window_bg_color, pipes_distance_between, pipes_range_margin, pipe_width, pipe_gap, pipe_velocity_x, bird_x_pos, bird_radius
 
 
 class Window(object):
-    def __init__(self, width, height):
+    def __init__(self, width, height, ai_enabled=True):
         pygame.init()
         self.width = width
         self.height = height
+        self.ai_enabled = ai_enabled
         self.screen = pygame.display.set_mode((width, height))
 
     def start_game_loop(self, max_fps):
@@ -37,10 +34,10 @@ class Window(object):
                 if (next_pipe.collision_with_bird(self.screen, bird) or
                     bird.y_pos < bird_radius or 
                     bird.y_pos > self.height - bird_radius): self.birds.remove(bird)
-                else: bird.render(self.screen, events, dt)
+                else: bird.render(self, events, dt)
 
             for pipe in self.pipes:
-                pipe.render(self.screen, events, dt)
+                pipe.render(self, events, dt)
 
             pygame.display.update()
             self.frame_count += 1
@@ -59,6 +56,11 @@ class Window(object):
             if pipe.x_pos + pipe_width >= bird_x_pos - bird_radius: return pipe
 
     def reset_game(self):
-        self.birds = [Bird(100)]
+        if self.ai_enabled:
+            self.birds = []
+            for i in range(500):
+                self.birds.append(Bird(150, False))
+        else: self.birds = [Bird(150, True)]
+        print(len(self.birds))
         self.pipes = [Pipe(self.width, random.randint(pipes_range_margin, self.height - pipe_gap - pipes_range_margin))]
         self.frame_count = 1

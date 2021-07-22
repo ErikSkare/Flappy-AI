@@ -1,13 +1,7 @@
 import pygame
 from app.actor import Actor
-from app.bird import bird_x_pos, bird_radius
 from app.utils import collision_rect_circle
-
-
-pipe_width = 30
-pipe_gap = 80
-pipe_color = (255, 255, 255)
-pipe_velocity_x = -200
+from app.constants import bird_x_pos, bird_radius, pipe_width, pipe_gap, pipe_color, pipe_velocity_x
 
 
 class Pipe(Actor):
@@ -15,11 +9,11 @@ class Pipe(Actor):
         self.x_pos = x_start
         self.gap_y_start = gap_y_start
 
-    def update_state(self, events, dt):
+    def update_state(self, events, dt, window):
         self.x_pos += pipe_velocity_x * dt
 
-    def draw(self, screen):
-        width, height = screen.get_size()
+    def draw(self, window):
+        width, height = window.screen.get_size()
         top_rect = (self.x_pos,
                     0,
                     pipe_width,
@@ -28,8 +22,8 @@ class Pipe(Actor):
                        self.gap_y_start + pipe_gap,
                        pipe_width,
                        height - (self.gap_y_start + pipe_gap))
-        pygame.draw.rect(screen, pipe_color, top_rect)
-        pygame.draw.rect(screen, pipe_color, bottom_rect)
+        pygame.draw.rect(window.screen, pipe_color, top_rect)
+        pygame.draw.rect(window.screen, pipe_color, bottom_rect)
 
     def collision_with_bird(self, screen, bird):
         width, height = screen.get_size()

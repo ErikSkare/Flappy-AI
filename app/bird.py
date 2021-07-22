@@ -1,12 +1,7 @@
 import pygame
 from app.actor import Actor
-
-
-bird_radius = 10
-bird_x_pos = 50
-bird_color = (255, 255, 255)
-bird_down_acceleration = 1500
-jump_velocity = -300
+from app.ai.neural_network import NeuralNetwork
+from app.constants import bird_radius, bird_x_pos, bird_color, bird_down_acceleration, bird_jump_velocity, pipe_gap
 
 
 class Bird(Actor):
@@ -16,21 +11,39 @@ class Bird(Actor):
         self.y_velocity = 0
         self.should_jump = False
         self.is_pressing_space = False
+        if not keyboard_input_enabled: self.brain = NeuralNetwork(6, 10, 1)
 
-    def update_state(self, events, dt):
+    def update_state(self, events, dt, window):
         self.y_velocity += bird_down_acceleration * dt
 
         if self.keyboard_input_enabled: self.process_keyboard_input(events)
+        else:
+            next_pipe = window.get_next_pipe()
+            
+            gap_y_start_normalized = next_pipe.gap_y_start / window.height
+            gap_y_end_normalized = (next_pipe.gap_y_start + pipe_gap) / window.height
+            pipe_x_pos_normalized = next_pipe.x_pos / window.width
+            bird_x_pos_normalized = bird_x_pos / window.width
+            bird_y_pos_normalized = self.y_pos / window.height
+            bird_y_velocity_normalized = self.y_velocity / window.height
+            
+            result = self.brain.get_result([pipe_x_pos_normalized, 
+                                            gap_y_start_normalized, 
+                                            gap_y_end_normalized, 
+                                            bird_x_pos_normalized,
+                                            bird_y_pos_normalized,
+                                            bird_y_velocity_normalized])[0]
+            if result > 0.5: self.jump()
 
         if self.should_jump: 
-            self.y_velocity = jump_velocity
+            self.y_velocity = bird_jump_velocity
             self.should_jump = False
 
         self.y_pos += self.y_velocity * dt
 
-    def draw(self, screen):
+    def draw(self, window):
         center = (bird_x_pos, int(self.y_pos))
-        pygame.draw.circle(screen, bird_color, center, bird_radius)
+        pygame.draw.circle(window.screen, bird_color, center, bird_radius)
 
     def jump(self):
         self.should_jump = True
