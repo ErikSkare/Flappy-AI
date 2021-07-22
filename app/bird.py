@@ -14,27 +14,11 @@ class Bird(Actor):
         if not keyboard_input_enabled: self.brain = NeuralNetwork(6, 10, 1)
 
     def update_state(self, events, dt, window):
-        self.y_velocity += bird_down_acceleration * dt
-
         if self.keyboard_input_enabled: self.process_keyboard_input(events)
-        else:
-            next_pipe = window.get_next_pipe()
-            
-            gap_y_start_normalized = next_pipe.gap_y_start / window.height
-            gap_y_end_normalized = (next_pipe.gap_y_start + pipe_gap) / window.height
-            pipe_x_pos_normalized = next_pipe.x_pos / window.width
-            bird_x_pos_normalized = bird_x_pos / window.width
-            bird_y_pos_normalized = self.y_pos / window.height
-            bird_y_velocity_normalized = self.y_velocity / window.height
-            
-            result = self.brain.get_result([pipe_x_pos_normalized, 
-                                            gap_y_start_normalized, 
-                                            gap_y_end_normalized, 
-                                            bird_x_pos_normalized,
-                                            bird_y_pos_normalized,
-                                            bird_y_velocity_normalized])[0]
-            if result > 0.5: self.jump()
+        else: self.predict_with_network(window)
 
+        self.y_velocity += bird_down_acceleration * dt
+        
         if self.should_jump: 
             self.y_velocity = bird_jump_velocity
             self.should_jump = False
@@ -55,4 +39,22 @@ class Bird(Actor):
                 self.jump()
             elif event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
                 self.is_pressing_space = False
+
+    def predict_with_network(self, window):
+            next_pipe = window.get_next_pipe()
+            
+            gap_y_start_normalized = next_pipe.gap_y_start / window.height
+            gap_y_end_normalized = (next_pipe.gap_y_start + pipe_gap) / window.height
+            pipe_x_pos_normalized = next_pipe.x_pos / window.width
+            bird_x_pos_normalized = bird_x_pos / window.width
+            bird_y_pos_normalized = self.y_pos / window.height
+            bird_y_velocity_normalized = self.y_velocity / window.height
+            
+            result = self.brain.get_result([pipe_x_pos_normalized, 
+                                            gap_y_start_normalized, 
+                                            gap_y_end_normalized, 
+                                            bird_x_pos_normalized,
+                                            bird_y_pos_normalized,
+                                            bird_y_velocity_normalized])[0]
+            if result > 0.5: self.jump()   
 
