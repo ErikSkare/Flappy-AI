@@ -15,3 +15,6 @@ pipe_velocity_x = -200
 window_bg_color = (0, 0, 0)
 pipes_distance_between = 200
 pipes_range_margin = 20
+
+#network operations
+mutation_rate = 0.2
