@@ -11,7 +11,7 @@ class Bird(Actor):
         self.y_velocity = 0
         self.should_jump = False
         self.is_pressing_space = False
-        if not keyboard_input_enabled: self.brain = NeuralNetwork(6, 10, 1)
+        if not keyboard_input_enabled: self.brain = NeuralNetwork(4, 6, 1)
 
     def update_state(self, events, dt, window):
         if self.keyboard_input_enabled: self.process_keyboard_input(events)
@@ -46,15 +46,11 @@ class Bird(Actor):
             gap_y_start_normalized = next_pipe.gap_y_start / window.height
             gap_y_end_normalized = (next_pipe.gap_y_start + pipe_gap) / window.height
             pipe_x_pos_normalized = next_pipe.x_pos / window.width
-            bird_x_pos_normalized = bird_x_pos / window.width
             bird_y_pos_normalized = self.y_pos / window.height
-            bird_y_velocity_normalized = self.y_velocity / window.height
             
             result = self.brain.get_result([pipe_x_pos_normalized, 
                                             gap_y_start_normalized, 
                                             gap_y_end_normalized, 
-                                            bird_x_pos_normalized,
-                                            bird_y_pos_normalized,
-                                            bird_y_velocity_normalized])[0]
+                                            bird_y_pos_normalized])[0]
             if result > 0.5: self.jump()   
 

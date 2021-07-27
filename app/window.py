@@ -1,6 +1,7 @@
 import sys, random, pygame
 from app.bird import Bird
 from app.pipe import Pipe
+from app.population_manager import PopulationManager
 from app.constants import window_bg_color, pipes_distance_between, pipes_range_margin, pipe_width, pipe_gap, pipe_velocity_x, bird_x_pos, bird_radius
 
 
@@ -11,6 +12,7 @@ class Window(object):
         self.height = height
         self.ai_enabled = ai_enabled
         self.screen = pygame.display.set_mode((width, height))
+        if ai_enabled: self.population_manager = PopulationManager(100)
 
     def start_game_loop(self, max_fps):
         clock = pygame.time.Clock()
@@ -33,7 +35,9 @@ class Window(object):
             for bird in self.birds:
                 if (next_pipe.collision_with_bird(self.screen, bird) or
                     bird.y_pos < bird_radius or 
-                    bird.y_pos > self.height - bird_radius): self.birds.remove(bird)
+                    bird.y_pos > self.height - bird_radius): 
+                        if self.ai_enabled: self.population_manager.add_dead_network(bird.brain)
+                        self.birds.remove(bird)
                 else: bird.render(self, events, dt)
 
             for pipe in self.pipes:
@@ -43,7 +47,6 @@ class Window(object):
             self.frame_count += 1
             
             if len(self.birds) == 0: self.reset_game()
-
 
     def should_close(self, events):
         for event in events:
@@ -57,9 +60,7 @@ class Window(object):
 
     def reset_game(self):
         if self.ai_enabled:
-            self.birds = []
-            for i in range(500):
-                self.birds.append(Bird(150, False))
+            self.birds = self.population_manager.get_next_population()
         else: self.birds = [Bird(150, True)]
         print(len(self.birds))
         self.pipes = [Pipe(self.width, random.randint(pipes_range_margin, self.height - pipe_gap - pipes_range_margin))]
